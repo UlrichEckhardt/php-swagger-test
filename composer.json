@@ -1,5 +1,5 @@
 {
-  "name": "byjg/swagger-test",
+  "name": "ulrich_eckhardt/swagger-test",
   "description": "A set of tools for testing your REST calls based on the Swagger or OpenAPI documentation using PHPUnit",
   "minimum-stability": "dev",
   "prefer-stable": true,

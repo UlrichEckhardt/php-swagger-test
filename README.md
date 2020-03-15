@@ -37,13 +37,13 @@ new OpenAPI 3 features, like callbacks and links, were not implemented. Previous
 
 # Using it as Functional Test cases
 
-Swagger Test provide the class `SwaggerTestCase` for you extend and create a PHPUnit test case. The code will try to 
+Swagger Test provides the class `ApiTestCase` for you to extend and to create a PHPUnit test case. The code will try to
 make a request to your API Method and check if the request parameters, status and object returned are OK.
 
 ```php
 <?php
 /**
- * Create a TestCase inherited from SwaggerTestCase
+ * Create a TestCase inherited from ApiTestCase
  */
 class MyTestCase extends \ByJG\ApiTools\ApiTestCase
 {

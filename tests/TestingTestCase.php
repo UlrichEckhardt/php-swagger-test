@@ -10,6 +10,7 @@ use ByJG\Util\MultiPartItem;
 use ByJG\Util\Psr7\Request;
 use ByJG\Util\Psr7\Response;
 use ByJG\Util\Uri;
+use Exception;
 use MintWare\Streams\MemoryStream;
 
 /**
@@ -142,4 +143,16 @@ abstract class TestingTestCase extends ApiTestCase
         $this->assertRequest($request);
     }
 
+    public function testRequestError()
+    {
+        $request = new ApiRequester();
+        $request
+            ->withMethod('GET')
+            ->withPath('/pet/1?status=available')
+            ->withQuery(['name' => 'Foo Foo']);
+
+        // the path of the request is invalid, it contains elements of the query parameters
+        $this->expectException(Exception::class);
+        $this->assertRequest($request);
+    }
 }

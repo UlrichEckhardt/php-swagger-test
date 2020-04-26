@@ -2,7 +2,6 @@
 
 namespace ByJG\ApiTools;
 
-use ByJG\ApiTools\Base\BaseTestCase;
 use ByJG\ApiTools\Base\Schema;
 use ByJG\ApiTools\Exception\DefinitionNotFoundException;
 use ByJG\ApiTools\Exception\GenericSwaggerException;

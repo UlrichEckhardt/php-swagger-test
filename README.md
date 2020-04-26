@@ -108,7 +108,7 @@ class MyTestCase extends \ByJG\ApiTools\ApiTestCase
         $request
             ->withMethod('POST')
             ->withPath("/path/for/post/3")
-            ->withQuery(['id'=>10])
+            ->withQueryParameter('id', 10)
             ->withRequestBody(['name'=>'new name', 'field' => 'value']);
 
         $this->assertRequest($request);

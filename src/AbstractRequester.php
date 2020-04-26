@@ -94,6 +94,30 @@ abstract class AbstractRequester
     }
 
     /**
+     * add query parameter(s)
+     *
+     * @param string $name
+     * @param string|string[] $value
+     * @return $this
+     */
+    public function withQueryParameter($name, $value)
+    {
+        // normalize `$value` to an array with 1-N values
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        // combine with existing query parameters
+        if (isset($this->query[$name])) {
+            $value = $this->query[$name] + $value;
+        }
+
+        $this->query[$name] = $value;
+
+        return $this;
+    }
+
+    /**
      * @param array $requestHeader
      * @return $this
      */
@@ -110,6 +134,7 @@ abstract class AbstractRequester
     }
 
     /**
+     * @deprecated Use withQueryParameter() instead.
      * @param array $query
      * @return $this
      */
@@ -120,7 +145,9 @@ abstract class AbstractRequester
             return $this;
         }
 
-        $this->query = array_merge($this->query, $query);
+        foreach ($query as $name => $value) {
+            $this->withQueryParameter($name, $value);
+        }
 
         return $this;
     }
@@ -291,6 +318,18 @@ abstract class AbstractRequester
             }
             if (strstr($this->path, '#') !== false) {
                 throw new Exception('path contains fragment identifier');
+            }
+        }
+
+        // validate query parameters
+        foreach ($this->query as $name => $values) {
+            if (!is_string($name)) {
+                throw new Exception('names of query parameters must be strings');
+            }
+            foreach ($values as $value) {
+                if (!is_string($value)) {
+                    throw new Exception('values of query parameters must be strings');
+                }
             }
         }
     }

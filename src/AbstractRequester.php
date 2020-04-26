@@ -5,6 +5,7 @@ namespace ByJG\ApiTools;
 use ByJG\ApiTools\Base\Schema;
 use ByJG\ApiTools\Exception\NotMatchedException;
 use ByJG\ApiTools\Exception\StatusCodeNotMatchedException;
+use Exception;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
@@ -23,8 +24,8 @@ use Psr\Http\Message\ResponseInterface;
  */
 abstract class AbstractRequester
 {
-    protected $method = 'get';
-    protected $path = '/';
+    protected $method;
+    protected $path;
     protected $requestHeader = [];
     protected $query = [];
     protected $requestBody = null;
@@ -161,6 +162,8 @@ abstract class AbstractRequester
      */
     public function send()
     {
+        $this->validateRequest();
+
         // Preparing Parameters
         $paramInQuery = null;
         if (!empty($this->query)) {
@@ -234,5 +237,61 @@ abstract class AbstractRequester
         }
 
         return $responseBody;
+    }
+
+    /**
+     * utility function to validate request data
+     *
+     * Note that this is incomplete still:
+     *  - not all paths are valid
+     *  - not all query parameters are valid
+     */
+    private function validateRequest()
+    {
+        // validate schema
+        if ($this->schema === null) {
+            throw new Exception('no schema set');
+        }
+        if (!($this->schema instanceof Schema)) {
+            throw new Exception('invalid schema set');
+        }
+
+        // validate method
+        if ($this->method === null) {
+            throw new Exception('no method set');
+        }
+        $validMethods = [
+            'CONNECT',
+            'DELETE',
+            'GET',
+            'HEAD',
+            'OPTIONS',
+            'PATCH',
+            'POST',
+            'PUT',
+            'TRACE',
+        ];
+        if (!in_array($this->method, $validMethods, true)) {
+            throw new Exception('invalid method set');
+        }
+
+        // validate path
+        if ($this->path === null) {
+            throw new Exception('no path set');
+        }
+        if (!is_string($this->path)) {
+            throw new Exception('invalid path set');
+        }
+        if ($this->path !== '') {
+            if ($this->path[0] !== '/') {
+                throw new Exception('path must be empty or begin with a slash');
+            }
+            if (strstr($this->path, '?') !== false) {
+                throw new Exception('path contains query parameters');
+            }
+            if (strstr($this->path, '#') !== false) {
+                throw new Exception('path contains fragment identifier');
+            }
+        }
     }
 }

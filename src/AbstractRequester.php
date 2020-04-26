@@ -11,6 +11,7 @@ use ByJG\Util\Psr7\Request;
 use ByJG\Util\Psr7\Response;
 use ByJG\Util\Uri;
 use MintWare\Streams\MemoryStream;
+use Exception;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -46,7 +47,7 @@ abstract class AbstractRequester
      */
     public function __construct()
     {
-        $this->withPsr7Request(Request::getInstance(new Uri("/"))->withMethod("get"));
+        $this->withPsr7Request(Request::getInstance(new Uri()));
     }
 
     /**
@@ -196,6 +197,8 @@ abstract class AbstractRequester
      */
     public function send()
     {
+        $this->validateRequest();
+
         // Process URI based on the OpenAPI schema
         $uriSchema = new Uri($this->schema->getServerUrl());
 
@@ -311,5 +314,56 @@ abstract class AbstractRequester
         }
 
         return $matchRequest;
+    }
+
+    /**
+     * utility function to validate request data
+     *
+     * Note that this is incomplete still:
+     *  - not all paths are valid
+     *  - not all query parameters are valid
+     */
+    private function validateRequest()
+    {
+        // validate schema
+        if ($this->schema === null) {
+            throw new Exception('no schema set');
+        }
+        if (!($this->schema instanceof Schema)) {
+            throw new Exception('invalid schema set');
+        }
+
+        // validate method
+        if ($this->psr7Request->getMethod() === '') {
+            throw new Exception('no method set');
+        }
+        $validMethods = [
+            'CONNECT',
+            'DELETE',
+            'GET',
+            'HEAD',
+            'OPTIONS',
+            'PATCH',
+            'POST',
+            'PUT',
+            'TRACE',
+        ];
+        if (!in_array($this->psr7Request->getMethod(), $validMethods, true)) {
+            throw new Exception('invalid method set');
+        }
+
+        // validate path
+        $path = $this->psr7Request->getUri()->getPath();
+        if ($path !== '') {
+            if ($path[0] !== '/') {
+                throw new Exception('path must be empty or begin with a slash');
+            }
+            if (strstr($path, '?') !== false) {
+                throw new Exception('path contains query parameters');
+            }
+            if (strstr($path, '#') !== false) {
+                throw new Exception('path contains fragment identifier');
+            }
+        }
     }
 }

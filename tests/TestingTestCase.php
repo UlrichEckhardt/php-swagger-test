@@ -5,6 +5,12 @@ namespace Test;
 use ByJG\ApiTools\ApiRequester;
 use ByJG\ApiTools\ApiTestCase;
 
+/**
+ * baseclass for further tests
+ *
+ * @see OpenApiTestCaseTest
+ * @see SwaggerTestCaseTest
+ */
 class TestingTestCase extends ApiTestCase
 {
 

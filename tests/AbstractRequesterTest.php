@@ -10,6 +10,11 @@ use PHPUnit\Framework\TestCase;
 
 class AbstractRequesterTest extends TestCase
 {
+    private const DEFAULT_METHOD = 'POST';
+    public const DEFAULT_SERVER_URL = 'https://example.com';
+    public const DEFAULT_BASE_PATH = '/v1';
+    private const DEFAULT_PATH = '/';
+
     /** @var MockObject|AbstractRequester */
     private $requester;
 
@@ -47,19 +52,19 @@ class AbstractRequesterTest extends TestCase
 
         // set up schema
         $this->schema->method('getServerUrl')
-            ->willReturn('https://api.example.com');
+            ->willReturn(self::DEFAULT_SERVER_URL);
         $this->schema->method('getBasePath')
-            ->willReturn('/v1');
+            ->willReturn(self::DEFAULT_BASE_PATH);
         $this->schema->method('getRequestParameters')
             ->with(
-                '/v1/endpoint',
-                'POST'
+                self::DEFAULT_BASE_PATH . self::DEFAULT_PATH,
+                self::DEFAULT_METHOD
             )
             ->willReturn($requestBody);
         $this->schema->method('getResponseParameters')
             ->with(
-                '/v1/endpoint',
-                'POST',
+                self::DEFAULT_BASE_PATH . self::DEFAULT_PATH,
+                self::DEFAULT_METHOD,
                 200
             )
             ->willReturn($responseBody);
@@ -72,16 +77,16 @@ class AbstractRequesterTest extends TestCase
             ->willReturnCallback(function ($request) {
                 // validate headers
                 $headers = $request->getHeaders();
-                $this->assertEquals($headers['Host'], ['api.example.com']);
+                $this->assertEquals($headers['Host'], ['example.com']);
                 $this->assertEquals($headers['Accept'], ['application/json']);
                 // validate method
-                $this->assertEquals('POST', $request->getMethod());
+                $this->assertEquals(self::DEFAULT_METHOD, $request->getMethod());
                 // validate URI
                 $uri = $request->getUri();
                 $this->assertEquals('https', $uri->getScheme());
                 $this->assertEquals('', $uri->getUserInfo());
-                $this->assertEquals('api.example.com', $uri->getHost());
-                $this->assertEquals('/endpoint', $uri->getPath());
+                $this->assertEquals('example.com', $uri->getHost());
+                $this->assertEquals(self::DEFAULT_PATH, $uri->getPath());
                 $this->assertEquals('id=42', $uri->getQuery());
                 $this->assertEquals('', $uri->getFragment());
 
@@ -89,8 +94,8 @@ class AbstractRequesterTest extends TestCase
             });
 
         $this->requester->withSchema($this->schema);
-        $this->requester->withMethod('POST');
-        $this->requester->withPath('/endpoint');
+        $this->requester->withMethod(self::DEFAULT_METHOD);
+        $this->requester->withPath(self::DEFAULT_PATH);
         $this->requester->withQuery(['id' => 42]);
 
         $res = $this->requester->send();
